@@ -35,4 +35,13 @@ jobs:
         run: npm run design:check
 
       - name: Dependency audit
-        run: npm audit --audit-level=high
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            npm audit --audit-level=high && exit 0
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            echo "npm audit service unavailable; retrying in $((attempt * 15)) seconds..."
+            sleep $((attempt * 15))
+          done
