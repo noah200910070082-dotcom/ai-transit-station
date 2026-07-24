@@ -2,9 +2,55 @@ export const NEW_API_BASE_URL =
   ((import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env?.VITE_API_BASE_URL ??
     "").replace(/\/$/, "");
 
+export function getPublicApiEndpoint(
+  configuredValue = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env
+    ?.VITE_PUBLIC_API_ENDPOINT,
+) {
+  const configuredEndpoint = configuredValue?.trim();
+  if (configuredEndpoint) {
+    return configuredEndpoint.replace(/\/$/, "");
+  }
+
+  if (/^https?:\/\//.test(NEW_API_BASE_URL)) {
+    return new URL("/v1", NEW_API_BASE_URL).toString().replace(/\/$/, "");
+  }
+
+  if (typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+    return `${window.location.protocol}//${window.location.hostname}:3000/v1`;
+  }
+
+  return typeof window === "undefined" ? "/v1" : `${window.location.origin}/v1`;
+}
+
 type RequestOptions = RequestInit & {
   skipSuccessCheck?: boolean;
 };
+
+const USER_ID_STORAGE_KEY = "uid";
+
+function getStoredUserId() {
+  try {
+    return typeof window === "undefined" ? null : window.localStorage.getItem(USER_ID_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function storeUserId(id: number) {
+  try {
+    window.localStorage.setItem(USER_ID_STORAGE_KEY, String(id));
+  } catch {
+    // The active session still works when storage is unavailable.
+  }
+}
+
+function clearStoredUserId() {
+  try {
+    window.localStorage.removeItem(USER_ID_STORAGE_KEY);
+  } catch {
+    // There is nothing else to clear when storage is unavailable.
+  }
+}
 
 export type NewApiEnvelope<T> = {
   success: boolean;
@@ -22,12 +68,17 @@ export type NewApiPage<T> = {
 export type NewApiStatusData = {
   version?: string;
   system_name?: string;
+  docs_link?: string;
   setup?: boolean;
   register_enabled?: boolean;
   password_login_enabled?: boolean;
   password_register_enabled?: boolean;
   quota_per_unit?: number;
 };
+
+export function getDocumentationUrl(status?: Pick<NewApiStatusData, "docs_link"> | null) {
+  return status?.docs_link?.trim() || "https://docs.newapi.pro";
+}
 
 export type NewApiUser = {
   id: number;
@@ -163,6 +214,11 @@ export async function newApiRequest<T>(path: string, options: RequestOptions = {
     headers.set("Content-Type", "application/json");
   }
 
+  const userId = getStoredUserId();
+  if (userId && !headers.has("New-Api-User")) {
+    headers.set("New-Api-User", userId);
+  }
+
   const response = await fetch(toApiUrl(path), {
     ...options,
     credentials: "include",
@@ -196,11 +252,15 @@ export function getStatus() {
   return newApiRequest<NewApiStatusData>("/api/status");
 }
 
-export function login(username: string, password: string) {
-  return newApiRequest<NewApiLoginData>("/api/user/login", {
+export async function login(username: string, password: string) {
+  const user = await newApiRequest<NewApiLoginData>("/api/user/login", {
     method: "POST",
     body: JSON.stringify({ username, password }),
   });
+  if (user.id) {
+    storeUserId(user.id);
+  }
+  return user;
 }
 
 export function registerAccount(username: string, password: string, affCode?: string) {
@@ -219,8 +279,12 @@ export function registerAccount(username: string, password: string, affCode?: st
   });
 }
 
-export function logout() {
-  return newApiRequest<null>("/api/user/logout");
+export async function logout() {
+  try {
+    return await newApiRequest<null>("/api/user/logout");
+  } finally {
+    clearStoredUserId();
+  }
 }
 
 export function getSelf() {
@@ -252,8 +316,9 @@ export function getUserModels() {
 
 export function getLogs(isAdmin: boolean, query = "") {
   const path = isAdmin ? "/api/log" : "/api/log/self";
-  const suffix = query ? `?${query}` : "?p=1&page_size=20";
-  return newApiRequest<NewApiPage<NewApiLog>>(`${path}${suffix}`);
+  const params = new URLSearchParams(query || "p=1&page_size=20");
+  params.set("type", "2");
+  return newApiRequest<NewApiPage<NewApiLog>>(`${path}?${params.toString()}`);
 }
 
 export function getLogStats(isAdmin: boolean, query = "") {

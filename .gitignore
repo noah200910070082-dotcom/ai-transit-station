@@ -10,7 +10,9 @@ gh-auth.*.log
 .env.*
 !.env.example
 !deploy/.env.new-api.example
+!deploy/.env.new-api.local.example
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+deploy/new-api/logs/

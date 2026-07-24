@@ -1,5 +1,30 @@
 # 部署方案
 
+## 当前本地一键流程
+
+```powershell
+npm run backend:local
+npm run backend:test
+```
+
+`backend:local` 会在首次运行时生成 `deploy/.env.new-api.local`。该文件被 Git 忽略，包含本地 PostgreSQL、Redis、session 和管理员凭证；不要把它上传到 GitHub。
+
+脚本会启动 `new-api`、PostgreSQL 和 Redis，等待 `/api/status` 可用，并在系统尚未初始化时创建本地 root 管理员。管理员账号不会显示在登录页，登录后的后端角色决定是否显示管理入口。
+
+前端使用两类地址：
+
+```env
+VITE_API_BASE_URL=
+VITE_DEV_API_TARGET=http://localhost:3000
+VITE_PUBLIC_API_ENDPOINT=http://localhost:3000/v1
+```
+
+- `VITE_API_BASE_URL`：控制台接口前缀；留空时使用同源 `/api`。
+- `VITE_DEV_API_TARGET`：Vite 把控制台 `/api` 请求代理到本地 `new-api`。
+- `VITE_PUBLIC_API_ENDPOINT`：用户复制到 OpenAI 客户端的模型调用地址，不是前端网址。
+
+Vercel 正式环境必须把 `VITE_PUBLIC_API_ENDPOINT` 设置为 VPS 后端的 HTTPS `/v1` 地址，例如 `https://api.example.com/v1`。
+
 ## 本地優先
 
 沒有 VPS 時，先用 Docker 在本機跑 `new-api`。

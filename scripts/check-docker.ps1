@@ -16,36 +16,13 @@ if (-not $dockerCommand -and (Test-Path -LiteralPath $fallbackDocker)) {
 & $docker --version
 & $docker compose version
 
-$stdoutFile = New-TemporaryFile
-$stderrFile = New-TemporaryFile
-
-try {
-  $infoProcess = Start-Process `
-    -FilePath $docker `
-    -ArgumentList "info" `
-    -NoNewWindow `
-    -PassThru `
-    -RedirectStandardOutput $stdoutFile.FullName `
-    -RedirectStandardError $stderrFile.FullName
-
-  if (-not $infoProcess.WaitForExit(12000)) {
-    $infoProcess.Kill()
-    Write-Host "Docker CLI exists, but Docker engine did not respond within 12 seconds."
-    Write-Host "Start Docker Desktop and make sure WSL2 is installed/enabled, then retry."
-    exit 1
+$engineOutput = & $docker info 2>&1
+if ($LASTEXITCODE -ne 0) {
+  if ($engineOutput) {
+    Write-Host ($engineOutput | Out-String).Trim()
   }
-
-  if ($infoProcess.ExitCode -ne 0) {
-    $engineError = Get-Content -Raw -ErrorAction SilentlyContinue $stderrFile.FullName
-    if ($engineError) {
-      Write-Host $engineError.Trim()
-    }
-    Write-Host "Docker CLI exists, but the engine is not running. Start Docker Desktop, then retry."
-    exit 1
-  }
-
-  Write-Host "Docker engine is running."
-} finally {
-  Remove-Item -LiteralPath $stdoutFile.FullName -Force -ErrorAction SilentlyContinue
-  Remove-Item -LiteralPath $stderrFile.FullName -Force -ErrorAction SilentlyContinue
+  Write-Host "Docker CLI exists, but the engine is not running. Start Docker Desktop, then retry."
+  exit 1
 }
+
+Write-Host "Docker engine is running."

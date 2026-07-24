@@ -42,11 +42,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
-  NEW_API_BASE_URL,
   createToken,
   deleteToken,
   getAffCode,
   getChannels,
+  getDocumentationUrl,
+  getPublicApiEndpoint,
   getLogStats,
   getLogs,
   getSelf,
@@ -321,7 +322,8 @@ function App() {
   const tr = (key: MessageKey) => messages[key][languageIndex[language]];
   const isLoggedIn = role !== "guest";
   const isAdmin = role === "admin";
-  const apiOrigin = NEW_API_BASE_URL || window.location.origin;
+  const publicApiEndpoint = getPublicApiEndpoint();
+  const documentationUrl = getDocumentationUrl(statusData);
   const appBase = import.meta.env.BASE_URL;
   const quotaUnit = statusData?.quota_per_unit;
 
@@ -559,8 +561,8 @@ function App() {
         <article className="panel quickStartPanel">
           <div className="panelHeader"><div><span className="eyebrow">OPENAI COMPATIBLE</span><h2>{tr("quickStart")}</h2></div><Code2 size={19} /></div>
           <p>{tr("apiEndpointNote")}</p>
-          <div className="endpointBox"><div><span>{tr("apiEndpoint")}</span><code>{apiOrigin}/v1</code></div><button className="iconButton" onClick={() => copyText(`${apiOrigin}/v1`)} title={tr("copy")} type="button">{copied ? <Check size={17} /> : <Copy size={17} />}</button></div>
-          <div className="quickActions"><button className="secondaryButton" onClick={() => setActivePage("keys")} type="button"><KeyRound size={16} />{tr("keys")}</button><a className="secondaryButton" href="/docs/api-quickstart.md" target="_blank"><BookOpen size={16} />{tr("documentation")}</a></div>
+          <div className="endpointBox"><div><span>{tr("apiEndpoint")}</span><code>{publicApiEndpoint}</code></div><button className="iconButton" onClick={() => copyText(publicApiEndpoint)} title={tr("copy")} type="button">{copied ? <Check size={17} /> : <Copy size={17} />}</button></div>
+          <div className="quickActions"><button className="secondaryButton" onClick={() => setActivePage("keys")} type="button"><KeyRound size={16} />{tr("keys")}</button><a className="secondaryButton" href={documentationUrl} rel="noreferrer" target="_blank"><BookOpen size={16} />{tr("documentation")}</a></div>
         </article>
         <article className="panel servicePanel">
           <div className="panelHeader"><div><span className="eyebrow">NEW-API</span><h2>{tr("announcements")}</h2></div><Bell size={19} /></div>
@@ -618,7 +620,7 @@ function App() {
   function renderAccount() {
     return <section className="twoColumn accountColumns">
       <article className="panel"><div className="panelHeader"><div><span className="eyebrow">PROFILE</span><h2>{tr("profile")}</h2></div><UserRound size={19} /></div><dl className="settingsList"><div><dt>{tr("userId")}</dt><dd>#{currentUser?.id ?? "-"}</dd></div><div><dt>{tr("usernameLabel")}</dt><dd>{currentUser?.username || "-"}</dd></div><div><dt>{tr("email")}</dt><dd>{currentUser?.email || tr("unavailable")}</dd></div><div><dt>{tr("userGroup")}</dt><dd>{currentUser?.group || "default"}</dd></div><div><dt>{tr("role")}</dt><dd>{isAdmin ? tr("administrator") : tr("member")}</dd></div></dl></article>
-      <div className="stackedPanels"><article className="panel"><div className="panelHeader"><div><span className="eyebrow">CONNECTION</span><h2>{tr("apiConnection")}</h2></div><Network size={19} /></div><div className="endpointBox"><div><span>{tr("apiEndpoint")}</span><code>{apiOrigin}/v1</code></div><button className="iconButton" onClick={() => copyText(`${apiOrigin}/v1`)} title={tr("copy")} type="button"><Copy size={17} /></button></div></article><article className="panel referralPanel"><div className="panelHeader"><div><span className="eyebrow">REFERRAL</span><h2>{tr("referral")}</h2></div><Gift size={19} /></div><div className="referralCode"><span>{tr("referralCode")}</span><strong>{affCode || tr("unavailable")}</strong><button className="iconButton" disabled={!affCode} onClick={() => copyText(affCode)} title={tr("copy")} type="button"><Copy size={16} /></button></div><div className="miniMetrics"><div><span>{tr("invitedUsers")}</span><strong>{formatNumber(currentUser?.aff_count, language, "0")}</strong></div><div><span>{tr("referralQuota")}</span><strong>{formatQuota(currentUser?.aff_quota, quotaUnit, language, "0")}</strong></div></div></article></div>
+      <div className="stackedPanels"><article className="panel"><div className="panelHeader"><div><span className="eyebrow">CONNECTION</span><h2>{tr("apiConnection")}</h2></div><Network size={19} /></div><div className="endpointBox"><div><span>{tr("apiEndpoint")}</span><code>{publicApiEndpoint}</code></div><button className="iconButton" onClick={() => copyText(publicApiEndpoint)} title={tr("copy")} type="button"><Copy size={17} /></button></div></article><article className="panel referralPanel"><div className="panelHeader"><div><span className="eyebrow">REFERRAL</span><h2>{tr("referral")}</h2></div><Gift size={19} /></div><div className="referralCode"><span>{tr("referralCode")}</span><strong>{affCode || tr("unavailable")}</strong><button className="iconButton" disabled={!affCode} onClick={() => copyText(affCode)} title={tr("copy")} type="button"><Copy size={16} /></button></div><div className="miniMetrics"><div><span>{tr("invitedUsers")}</span><strong>{formatNumber(currentUser?.aff_count, language, "0")}</strong></div><div><span>{tr("referralQuota")}</span><strong>{formatQuota(currentUser?.aff_quota, quotaUnit, language, "0")}</strong></div></div></article></div>
     </section>;
   }
 

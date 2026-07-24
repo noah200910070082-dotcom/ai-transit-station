@@ -25,6 +25,10 @@
 - `vercel.json`：前端 Vercel 部署。
 - `src/api/newApi.ts`：前端對 `new-api` 的薄封裝。
 - `api/[...path].js`：Vercel 同源 API 代理，指向 `NEW_API_ORIGIN`。
+- `deploy/.env.new-api.local`：首次本地启动自动生成的 Git 忽略密钥与管理员凭证。
+- `scripts/test-new-api-integration.ps1`：真实后端端到端验证，覆盖登录、注册、Token、模型、日志、用户和渠道。
+- 新版 `new-api` 的 session 请求必须同时带 `New-Api-User` 用户 ID 请求头；前端统一保存为本地 `uid` 并由 API 封装附加。
+- 用户模型调用地址独立使用 `VITE_PUBLIC_API_ENDPOINT`，不得把前端 Vite/Vercel 地址误当成 `/v1` 网关。
 
 ## 固定驗證
 
@@ -32,6 +36,7 @@
 npm run build
 npm run design:check
 npm run docker:check
+npm run backend:test
 npm audit --audit-level=high
 ```
 
@@ -45,5 +50,6 @@ npm run backend:local
 
 - Docker Desktop 已透過 `winget` 安裝。
 - `docker.exe` 位於 `C:\Program Files\Docker\Docker\resources\bin\docker.exe`。
-- 當前 shell 無提升權限，無法啟用 WSL / DISM Windows 功能。
-- Docker Desktop 需要 WSL2 完成初始化後才能讓本地 compose 跑起來。
+- Docker Desktop 4.78.0 與 Linux engine 已可用。
+- 本地 `new-api`、PostgreSQL、Redis 已通过 Docker Compose 启动并完成首次初始化。
+- 本地管理員凭证保存在 Git 忽略的 `deploy/.env.new-api.local`，不得写入文档或提交。
