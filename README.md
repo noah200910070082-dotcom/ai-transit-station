@@ -2,6 +2,13 @@
 
 一个基于 React、Vite 与开源 `new-api` 后端的 AI API 中转站控制台。
 
+[![CI](https://github.com/noah200910070082-dotcom/ai-transit-station/actions/workflows/ci.yml/badge.svg)](https://github.com/noah200910070082-dotcom/ai-transit-station/actions/workflows/ci.yml)
+[![Deploy GitHub Pages](https://github.com/noah200910070082-dotcom/ai-transit-station/actions/workflows/pages.yml/badge.svg)](https://github.com/noah200910070082-dotcom/ai-transit-station/actions/workflows/pages.yml)
+
+在线前端预览：[https://noah200910070082-dotcom.github.io/ai-transit-station/](https://noah200910070082-dotcom.github.io/ai-transit-station/)
+
+> GitHub Pages 仅承载静态前端预览，无法运行 `new-api`、数据库或同源 API 代理。完整注册、登录、计费和渠道能力需要按本文档部署 VPS Docker 后端，并通过 Vercel 同源代理提供正式服务。
+
 项目采用 A6API 风格的专业信息密度、Right Code 风格的清晰层级，并保留自己的青绿色产品视觉。登录、注册、令牌、模型、日志、充值、用户和渠道数据均通过真实 `new-api` 接口获取，不使用前端假数据冒充后端。
 
 ## 当前功能

@@ -322,6 +322,7 @@ function App() {
   const isLoggedIn = role !== "guest";
   const isAdmin = role === "admin";
   const apiOrigin = NEW_API_BASE_URL || window.location.origin;
+  const appBase = import.meta.env.BASE_URL;
   const quotaUnit = statusData?.quota_per_unit;
 
   useEffect(() => {
@@ -647,7 +648,7 @@ function App() {
     const passwordLoginDisabled = statusData?.password_login_enabled === false;
     const statusLabel = backendStatus === "online" ? tr("backendOnline") : backendStatus === "checking" ? tr("backendChecking") : tr("backendOffline");
     return <main className={`authPage ${darkMode ? "dark" : ""}`}>
-      <header className="authTop"><a className="authBrand" href="/"><span><Network size={21} /></span><strong>{tr("brand")}</strong></a><div className="authTools"><button className="iconButton" onClick={() => setDarkMode((value) => !value)} title={tr("theme")} type="button">{darkMode ? <Sun size={17} /> : <Moon size={17} />}</button><label className="languageControl"><Globe2 size={16} /><select value={language} onChange={(event) => setLanguage(event.target.value as Language)}>{languageOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label></div></header>
+      <header className="authTop"><a className="authBrand" href={appBase}><span><Network size={21} /></span><strong>{tr("brand")}</strong></a><div className="authTools"><button className="iconButton" onClick={() => setDarkMode((value) => !value)} title={tr("theme")} type="button">{darkMode ? <Sun size={17} /> : <Moon size={17} />}</button><label className="languageControl"><Globe2 size={16} /><select value={language} onChange={(event) => setLanguage(event.target.value as Language)}>{languageOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label></div></header>
       <section className="authViewport">
         <div className="authIdentity"><span className="authLogo"><Network size={28} /></span><h1>{tr("brand")}</h1><p>{tr("productTag")}</p></div>
         <form className="authCard" onSubmit={handleAuth}>
