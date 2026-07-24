@@ -1,0 +1,16 @@
+node_modules
+dist
+*.tsbuildinfo
+vite.out.log
+vite.err.log
+.agents/
+.codex/
+gh-auth.*.log
+.env
+.env.*
+!.env.example
+!deploy/.env.new-api.example
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
