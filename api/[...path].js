@@ -23,13 +23,13 @@ function getBody(req) {
   return JSON.stringify(req.body);
 }
 
-function getTargetUrl(req, upstreamOrigin) {
-  const pathValue = req.query.path;
+export function getTargetUrl(req, upstreamOrigin) {
+  const pathValue = req.query.path ?? req.query["...path"];
   const path = Array.isArray(pathValue) ? pathValue.join("/") : pathValue || "";
   const targetUrl = new URL(`/api/${path}`, upstreamOrigin);
 
   for (const [key, value] of Object.entries(req.query)) {
-    if (key === "path") {
+    if (key === "path" || key === "...path") {
       continue;
     }
     if (Array.isArray(value)) {
