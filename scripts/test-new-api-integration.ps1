@@ -1,6 +1,6 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
-$baseUrl = "http://localhost:3000"
+$baseUrl = if ($env:NEW_API_TEST_BASE_URL) { $env:NEW_API_TEST_BASE_URL.TrimEnd('/') } else { "http://localhost:3000" }
 $envFile = "$PSScriptRoot\..\deploy\.env.new-api.local"
 
 if (-not (Test-Path -LiteralPath $envFile)) {
@@ -113,3 +113,4 @@ try {
     try { Invoke-NewApi -Path "/api/user/$testUserId" -Method DELETE -Session $adminSession | Out-Null } catch { Write-Warning $_ }
   }
 }
+
